@@ -41,4 +41,11 @@ public class UserController {
          userService.deleteUser(id);
     }
 
+    @GetMapping("/find/{id}")
+    public User findId(@PathVariable Long id ){
+        System.out.println("User" + id);
+        return userService.findById(id);
+
+    }
+
 }
