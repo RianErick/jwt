@@ -3,10 +3,13 @@ package com.example.crudwithdocker.controller;
 import com.example.crudwithdocker.model.UserAuth;
 import com.example.crudwithdocker.model.record.UserAuthRecord;
 import com.example.crudwithdocker.repository.UserAuthRepository;
+import com.example.crudwithdocker.security.TokenService;
+import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,12 +25,15 @@ public class AuthController {
 
     private final AuthenticationManager manager;
 
+    private final TokenService tokenService;
+
     public AuthController(PasswordEncoder passwordEncoder,
                           UserAuthRepository userAuthRepository,
-                          AuthenticationManager manager) {
+                          AuthenticationManager manager, TokenService tokenService) {
         this.passwordEncoder = passwordEncoder;
         this.userAuthRepository = userAuthRepository;
         this.manager = manager;
+        this.tokenService = tokenService;
     }
 
     @PostMapping("/login")
@@ -35,8 +41,8 @@ public class AuthController {
 
          var login = new UsernamePasswordAuthenticationToken(userAuthRecord.user()
                                                              ,userAuthRecord.password());
-         manager.authenticate(login);
-         return ResponseEntity.ok().build();
+         var authentication = manager.authenticate(login);
+         return ResponseEntity.ok(tokenService.gerarToken((UserAuth) authentication.getPrincipal()));
     }
 
     @ResponseStatus(HttpStatus.CREATED)

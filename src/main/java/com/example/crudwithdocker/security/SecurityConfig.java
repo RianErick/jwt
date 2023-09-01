@@ -1,6 +1,5 @@
 package com.example.crudwithdocker.security;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -29,13 +28,13 @@ public class SecurityConfig {
                        authz.requestMatchers(HttpMethod.POST , "/user").hasAnyRole("ADMIN");
                        authz.requestMatchers(HttpMethod.PUT , "/user").hasAnyRole("ADMIN");
                        authz.requestMatchers(HttpMethod.DELETE , "/user").hasAnyRole("ADMIN");
+                       authz.requestMatchers(HttpMethod.GET , "/user").hasAnyRole("ADMIN");
 
 
                        authz.requestMatchers(HttpMethod.POST , "auth/login").permitAll();
-                       authz.requestMatchers(HttpMethod.POST , "auth/create").permitAll();
-                       authz.requestMatchers(HttpMethod.GET , "user").permitAll()
+                       authz.requestMatchers(HttpMethod.POST , "auth/create").permitAll()
 
-                       .anyRequest().permitAll();
+                       .anyRequest().authenticated();
 
 
                 }).build();
