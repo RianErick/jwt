@@ -1,5 +1,6 @@
 package com.example.crudwithdocker.security;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,11 +12,16 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @RequiredArgsConstructor
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig {
+
+    @Autowired
+    private final SecurityFilter securityFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -24,20 +30,14 @@ public class SecurityConfig {
                 .sessionManagement( session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests( authz -> {
 
-
-                       authz.requestMatchers(HttpMethod.POST , "/user").hasAnyRole("ADMIN");
-                       authz.requestMatchers(HttpMethod.PUT , "/user").hasAnyRole("ADMIN");
-                       authz.requestMatchers(HttpMethod.DELETE , "/user").hasAnyRole("ADMIN");
-                       authz.requestMatchers(HttpMethod.GET , "/user").hasAnyRole("ADMIN");
-
-
-                       authz.requestMatchers(HttpMethod.POST , "auth/login").permitAll();
-                       authz.requestMatchers(HttpMethod.POST , "auth/create").permitAll()
-
+                        authz.requestMatchers(HttpMethod.POST , "auth/login").permitAll();
+                        authz.requestMatchers(HttpMethod.POST , "auth/create").permitAll()
                        .anyRequest().authenticated();
 
+                })
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
 
-                }).build();
        }
        @Bean
        public AuthenticationManager authenticationManager
